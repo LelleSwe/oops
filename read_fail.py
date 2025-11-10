@@ -1,8 +1,8 @@
 #!/bin/env python3
-import RPi.GPIO as rGPIO
+import RPi.GPIO as GPIO
 import time
 
-# Set the rGPIO pin number where the DHT sensor's data pin is connected.
+# Set the GPIO pin number where the DHT sensor's data pin is connected.
 LINEFAIL_PIN = 26
 
 def linefail_callback():
@@ -10,24 +10,24 @@ def linefail_callback():
     time.sleep(60) # 60 seconds
 
 def setup():
-    rGPIO.setmode(rGPIO.BCM)
-    rGPIO.setup(LINEFAIL_PIN, rGPIO.IN, pull_up_down=rGPIO.PUD_UP)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(LINEFAIL_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-    print(f"Reading pullup on rGPIO {LINEFAIL_PIN}...")
+    print(f"Reading pullup on GPIO {LINEFAIL_PIN}...")
     print("Press Ctrl+C to exit.")
 
-    rGPIO.add_event_detect(
-        LINEFAIL_PIN, rGPIO.FALLING, callback=linefail_callback, bouncetime=200
+    GPIO.add_event_detect(
+        LINEFAIL_PIN, GPIO.FALLING, callback=linefail_callback, bouncetime=200
     )
 
-    print("Monitoring UPS line fail on pin 37 (rGPIO26). Press Ctrl+C to exit.")
+    print("Monitoring UPS line fail on pin 37 (GPIO26). Press Ctrl+C to exit.")
 
 has_linefailed = True 
 while True:
     if has_linefailed:
         setup()
 
-    if rGPIO.event_detected(LINEFAIL_PIN):
+    if GPIO.event_detected(LINEFAIL_PIN):
         has_linefailed = True
 
     try:
@@ -38,7 +38,7 @@ while True:
     finally:
         if has_linefailed:
             try:
-                rGPIO.remove_event_detect(LINEFAIL_PIN)
+                GPIO.remove_event_detect(LINEFAIL_PIN)
             except: pass
-            rGPIO.cleanup()
+            GPIO.cleanup()
             has_linefailed = False
